@@ -1,0 +1,224 @@
+{
+  "info": {
+    "name": "order-service",
+    "_postman_id": "order-service-collection",
+    "description": "Postman collection for order-service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8082"
+    },
+    {
+      "key": "sessionId",
+      "value": "session-demo-001"
+    },
+    {
+      "key": "productId",
+      "value": "00000000-0000-0000-0000-000000000001"
+    },
+    {
+      "key": "itemId",
+      "value": "20000000-0000-0000-0000-000000000001"
+    },
+    {
+      "key": "orderId",
+      "value": "30000000-0000-0000-0000-000000000001"
+    },
+    {
+      "key": "orderNumber",
+      "value": "ORD-20260412-0001"
+    }
+  ],
+  "item": [
+    {
+      "name": "GET /api/v1/carts/{sessionId}",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "description": "Получение активной корзины",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/carts/{{sessionId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "carts",
+            "{{sessionId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/v1/carts/{sessionId}/items",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "description": "Добавление товара в корзину",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/carts/{{sessionId}}/items",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "carts",
+            "{{sessionId}}",
+            "items"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"product_id\": \"{{productId}}\",\n  \"qty\": 2\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PATCH /api/v1/carts/{sessionId}/items/{itemId}",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "description": "Изменение количества",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/carts/{{sessionId}}/items/{{itemId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "carts",
+            "{{sessionId}}",
+            "items",
+            "{{itemId}}"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"qty\": 3\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE /api/v1/carts/{sessionId}/items/{itemId}",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "description": "Удаление позиции",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/carts/{{sessionId}}/items/{{itemId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "carts",
+            "{{sessionId}}",
+            "items",
+            "{{itemId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/v1/orders",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "description": "Оформление заказа",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/orders",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "orders"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"session_id\": \"{{sessionId}}\",\n  \"customer_name\": \"Иван Иванов\",\n  \"phone\": \"+79990000000\",\n  \"email\": \"ivan@example.com\",\n  \"city\": \"Москва\",\n  \"address\": \"ул. Ленина, д. 1\",\n  \"comment\": \"Позвонить за час\",\n  \"delivery_cost\": 0\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /api/v1/orders/{orderNumber}",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "description": "Просмотр заказа по номеру",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/orders/{{orderNumber}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "orders",
+            "{{orderNumber}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PATCH /api/v1/orders/{id}/status",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "description": "Смена статуса заказа",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/orders/{{orderId}}/status",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "orders",
+            "{{orderId}}",
+            "status"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"status\": \"CONFIRMED\",\n  \"comment\": \"Заказ подтвержден оператором\"\n}"
+        }
+      },
+      "response": []
+    }
+  ]
+}

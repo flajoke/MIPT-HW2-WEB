@@ -1,0 +1,23 @@
+services:
+  catalog-service:
+    build: ./catalog-service
+    container_name: lvd-catalog-service
+    environment:
+      CATALOG_HOST: 0.0.0.0
+      CATALOG_PORT: 8081
+      CATALOG_DB_PATH: /app/catalog.sqlite3
+    ports:
+      - "8081:8081"
+
+  order-service:
+    build: ./order-service
+    container_name: lvd-order-service
+    depends_on:
+      - catalog-service
+    environment:
+      ORDER_HOST: 0.0.0.0
+      ORDER_PORT: 8082
+      ORDER_DB_PATH: /app/order.sqlite3
+      CATALOG_BASE_URL: http://catalog-service:8081
+    ports:
+      - "8082:8082"

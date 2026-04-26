@@ -1,0 +1,155 @@
+{
+  "info": {
+    "name": "catalog-service",
+    "_postman_id": "catalog-service-collection",
+    "description": "Postman collection for catalog-service",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081"
+    },
+    {
+      "key": "productId",
+      "value": "00000000-0000-0000-0000-000000000001"
+    },
+    {
+      "key": "categoryId",
+      "value": "10000000-0000-0000-0000-000000000001"
+    }
+  ],
+  "item": [
+    {
+      "name": "GET /api/v1/products",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "description": "Список товаров каталога",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/products?status=ACTIVE&page=1&limit=20",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "products?status=ACTIVE&page=1&limit=20"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /api/v1/products/{id}",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "description": "Карточка товара",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/products/{{productId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "products",
+            "{{productId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/v1/products",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "description": "Создание товара",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/products",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "products"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"sku\": \"LMP-A60-10W-E27-4000K\",\n  \"name\": \"Лампочка LED A60 10W E27 4000K\",\n  \"description\": \"Матовая светодиодная лампа для дома\",\n  \"category_id\": \"{{categoryId}}\",\n  \"price\": 199.0,\n  \"currency\": \"RUB\",\n  \"stock_qty\": 120,\n  \"socket_type\": \"E27\",\n  \"wattage\": 10,\n  \"color_temperature\": 4000,\n  \"status\": \"ACTIVE\"\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PATCH /api/v1/products/{id}",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "description": "Изменение цены и остатка",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/products/{{productId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "products",
+            "{{productId}}"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"price\": 219.0,\n  \"stock_qty\": 150\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/v1/products/{id}/archive",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "description": "Архивация товара",
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/products/{{productId}}/archive",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "products",
+            "{{productId}}",
+            "archive"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{}"
+        }
+      },
+      "response": []
+    }
+  ]
+}
