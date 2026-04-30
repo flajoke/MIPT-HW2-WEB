@@ -21,3 +21,12 @@ services:
       CATALOG_BASE_URL: http://catalog-service:8081
     ports:
       - "8082:8082"
+
+  frontend:
+    build: ./frontend
+    container_name: lvd-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - catalog-service
+      - order-service
