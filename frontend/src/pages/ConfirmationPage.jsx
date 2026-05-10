@@ -1,5 +1,7 @@
 import { useMemo } from 'react';
+import { useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
+import { selectLastCreatedOrder } from '../store/ordersSlice.js';
 import { formatPrice } from '../utils/formatters.js';
 
 function readLastOrder() {
@@ -12,7 +14,8 @@ function readLastOrder() {
 
 function ConfirmationPage() {
   const location = useLocation();
-  const order = useMemo(() => location.state?.order || readLastOrder(), [location.state]);
+  const lastCreatedOrder = useSelector(selectLastCreatedOrder);
+  const order = useMemo(() => location.state?.order || lastCreatedOrder || readLastOrder(), [lastCreatedOrder, location.state]);
 
   return (
     <div className="container page-stack">
@@ -23,21 +26,21 @@ function ConfirmationPage() {
         {order ? (
           <>
             <p>
-              Номер заказа <strong>{order.orderNumber}</strong> отправлен на {order.email}. Менеджер свяжется с вами для
-              подтверждения деталей доставки.
+              Номер заказа <strong>{order.order_number}</strong> создан в order-service и отправлен на {order.email}.
+              Менеджер свяжется с вами для подтверждения деталей доставки.
             </p>
             <div className="confirmation-details">
               <div>
                 <span>Получатель</span>
-                <strong>{order.customerName}</strong>
+                <strong>{order.customer_name}</strong>
               </div>
               <div>
                 <span>Товаров</span>
-                <strong>{order.itemsCount}</strong>
+                <strong>{order.items?.reduce((sum, item) => sum + item.qty, 0) || 0}</strong>
               </div>
               <div>
-                <span>Доставка</span>
-                <strong>{order.deliveryCost === 0 ? 'Бесплатно' : formatPrice(order.deliveryCost)}</strong>
+                <span>Статус</span>
+                <strong>{order.status}</strong>
               </div>
               <div>
                 <span>Итого</span>

@@ -1,27 +1,36 @@
 import { useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import ProductVisual from '../components/ProductVisual.jsx';
 import QuantityControl from '../components/QuantityControl.jsx';
-import { getProductBySlug, products } from '../data/products.js';
-import { useCart } from '../context/CartContext.jsx';
+import { addCartItem, selectCartActionStatus } from '../store/cartSlice.js';
+import { selectProductBySlug, selectProducts, selectProductsStatus } from '../store/productsSlice.js';
 import { formatColorTemperature, formatPrice } from '../utils/formatters.js';
 
 function ProductPage() {
   const { slug } = useParams();
-  const product = getProductBySlug(slug);
+  const dispatch = useDispatch();
+  const product = useSelector((state) => selectProductBySlug(state, slug));
+  const products = useSelector(selectProducts);
+  const productsStatus = useSelector(selectProductsStatus);
+  const cartActionStatus = useSelector(selectCartActionStatus);
   const [qty, setQty] = useState(1);
-  const { addItem } = useCart();
 
   const relatedProducts = useMemo(() => {
     if (!product) return [];
     return products.filter((item) => item.categoryId === product.categoryId && item.id !== product.id).slice(0, 3);
-  }, [product]);
+  }, [product, products]);
+
+  if (productsStatus === 'loading' || productsStatus === 'idle') {
+    return <div className="container"><div className="info-banner">Загружаем карточку товара из catalog-service...</div></div>;
+  }
 
   if (!product) {
     return <Navigate to="/catalog" replace />;
   }
 
-  const isAvailable = product.stockQty > 0;
+  const isAvailable = product.status === 'ACTIVE' && product.stockQty > 0;
+  const isCartBusy = cartActionStatus === 'loading';
 
   return (
     <div className="container page-stack">
@@ -49,10 +58,9 @@ function ProductPage() {
           <div className="product-price-row">
             <div className="price-block price-block--big">
               <strong>{formatPrice(product.price, product.currency)}</strong>
-              {product.oldPrice && <span>{formatPrice(product.oldPrice, product.currency)}</span>}
             </div>
             <span className={isAvailable ? 'status status--success' : 'status status--muted'}>
-              {isAvailable ? `В наличии: ${product.stockQty} шт.` : 'Нет в наличии'}
+              {isAvailable ? `Доступно: ${product.stockQty} шт.` : 'Нет в наличии'}
             </span>
           </div>
 
@@ -61,8 +69,8 @@ function ProductPage() {
             <button
               className="button button--primary button--wide"
               type="button"
-              disabled={!isAvailable}
-              onClick={() => addItem(product, qty)}
+              disabled={!isAvailable || isCartBusy}
+              onClick={() => dispatch(addCartItem({ productId: product.id, qty }))}
             >
               Добавить в корзину
             </button>
@@ -90,8 +98,12 @@ function ProductPage() {
               <dd>{product.voltage} V</dd>
             </div>
             <div>
-              <dt>Срок службы</dt>
-              <dd>{product.lifetime}</dd>
+              <dt>Остаток на складе</dt>
+              <dd>{product.totalStockQty} шт.</dd>
+            </div>
+            <div>
+              <dt>В резерве</dt>
+              <dd>{product.reservedQty} шт.</dd>
             </div>
             <div>
               <dt>Гарантия</dt>
