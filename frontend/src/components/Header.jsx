@@ -1,8 +1,9 @@
+import { useSelector } from 'react-redux';
 import { NavLink } from 'react-router-dom';
-import { useCart } from '../context/CartContext.jsx';
+import { selectCartCount } from '../store/cartSlice.js';
 
 function Header() {
-  const { cartCount } = useCart();
+  const cartCount = useSelector(selectCartCount);
 
   return (
     <header className="site-header">

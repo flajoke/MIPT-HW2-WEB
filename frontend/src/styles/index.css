@@ -1095,3 +1095,30 @@ small,
     flex-direction: column;
   }
 }
+
+.api-note,
+.info-banner,
+.error-banner {
+  padding: 14px 18px;
+  border-radius: var(--radius-md);
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.api-note,
+.info-banner {
+  color: #1e3a8a;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.error-banner {
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.link-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}

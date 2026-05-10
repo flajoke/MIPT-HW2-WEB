@@ -1,11 +1,14 @@
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { useCart } from '../context/CartContext.jsx';
+import { addCartItem, selectCartActionStatus } from '../store/cartSlice.js';
 import { formatColorTemperature, formatPrice } from '../utils/formatters.js';
 import ProductVisual from './ProductVisual.jsx';
 
 function ProductCard({ product }) {
-  const { addItem } = useCart();
-  const isAvailable = product.stockQty > 0;
+  const dispatch = useDispatch();
+  const actionStatus = useSelector(selectCartActionStatus);
+  const isAvailable = product.status === 'ACTIVE' && product.stockQty > 0;
+  const isCartBusy = actionStatus === 'loading';
 
   return (
     <article className="product-card">
@@ -16,7 +19,7 @@ function ProductCard({ product }) {
       <div className="product-card__content">
         <div className="product-card__meta">
           <span>{product.category}</span>
-          <span>{product.stockQty > 0 ? `В наличии: ${product.stockQty}` : 'Нет в наличии'}</span>
+          <span>{product.stockQty > 0 ? `Доступно: ${product.stockQty}` : 'Нет в наличии'}</span>
         </div>
 
         <Link to={`/product/${product.slug}`} className="product-card__title">
@@ -34,9 +37,13 @@ function ProductCard({ product }) {
         <div className="product-card__footer">
           <div className="price-block">
             <strong>{formatPrice(product.price, product.currency)}</strong>
-            {product.oldPrice && <span>{formatPrice(product.oldPrice, product.currency)}</span>}
           </div>
-          <button className="button button--primary" type="button" disabled={!isAvailable} onClick={() => addItem(product)}>
+          <button
+            className="button button--primary"
+            type="button"
+            disabled={!isAvailable || isCartBusy}
+            onClick={() => dispatch(addCartItem({ productId: product.id, qty: 1 }))}
+          >
             {isAvailable ? 'В корзину' : 'Нет в наличии'}
           </button>
         </div>

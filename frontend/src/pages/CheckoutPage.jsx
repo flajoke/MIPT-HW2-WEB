@@ -1,8 +1,11 @@
 import { useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import OrderSummary from '../components/OrderSummary.jsx';
-import { useCart } from '../context/CartContext.jsx';
-import { createOrderNumber, getDeliveryCost } from '../utils/formatters.js';
+import { fetchCart, selectCartItems, selectCartStatus, selectCartSubtotal } from '../store/cartSlice.js';
+import { createOrder, selectOrdersError, selectOrdersStatus } from '../store/ordersSlice.js';
+import { fetchProducts } from '../store/productsSlice.js';
+import { getDeliveryCost } from '../utils/formatters.js';
 
 const initialForm = {
   name: '',
@@ -29,11 +32,20 @@ const validateForm = (form) => {
 
 function CheckoutPage() {
   const navigate = useNavigate();
-  const { cartItems, subtotal, clearCart } = useCart();
+  const dispatch = useDispatch();
+  const cartItems = useSelector(selectCartItems);
+  const subtotal = useSelector(selectCartSubtotal);
+  const cartStatus = useSelector(selectCartStatus);
+  const orderStatus = useSelector(selectOrdersStatus);
+  const orderError = useSelector(selectOrdersError);
   const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
 
   const deliveryCost = useMemo(() => getDeliveryCost(subtotal, form.deliveryType), [subtotal, form.deliveryType]);
+
+  if (cartStatus === 'loading') {
+    return <div className="container"><div className="info-banner">Проверяем корзину перед оформлением...</div></div>;
+  }
 
   if (cartItems.length === 0) {
     return <Navigate to="/cart" replace />;
@@ -44,30 +56,25 @@ function CheckoutPage() {
     setErrors((current) => ({ ...current, [field]: undefined }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const nextErrors = validateForm(form);
     setErrors(nextErrors);
 
     if (Object.keys(nextErrors).length > 0) return;
 
-    const order = {
-      orderNumber: createOrderNumber(),
-      customerName: form.name.trim(),
-      email: form.email.trim(),
-      deliveryType: form.deliveryType,
-      paymentType: form.paymentType,
-      itemsCount: cartItems.reduce((sum, item) => sum + item.qty, 0),
-      subtotal,
-      deliveryCost,
-      total: subtotal + deliveryCost,
-      createdAt: new Date().toISOString(),
-    };
-
-    localStorage.setItem('lvd-store-last-order', JSON.stringify(order));
-    clearCart();
-    navigate('/confirmation', { state: { order } });
+    try {
+      const order = await dispatch(createOrder({ form, deliveryCost })).unwrap();
+      localStorage.setItem('lvd-store-last-order', JSON.stringify(order));
+      await dispatch(fetchCart());
+      await dispatch(fetchProducts());
+      navigate('/confirmation', { state: { order } });
+    } catch {
+      // Текст ошибки уже лежит в Redux и выводится ниже формы.
+    }
   };
+
+  const isSubmitting = orderStatus === 'loading';
 
   return (
     <div className="container page-stack">
@@ -161,7 +168,7 @@ function CheckoutPage() {
                   onChange={(event) => setField('paymentType', event.target.value)}
                 />
                 <span>Картой онлайн</span>
-                <small>Mock-оплата без реального платежа</small>
+                <small>Учебный сценарий без реального платежа</small>
               </label>
               <label className="radio-card">
                 <input
@@ -187,16 +194,17 @@ function CheckoutPage() {
             <span>Я согласен с условиями обработки заказа и понимаю, что это учебная форма без реальной оплаты.</span>
           </label>
           {errors.agreement && <small className="form-error">{errors.agreement}</small>}
+          {orderError && <div className="error-banner">Ошибка оформления: {orderError}</div>}
 
-          <button className="button button--primary button--wide" type="submit">
-            Подтвердить заказ
+          <button className="button button--primary button--wide" type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Отправляем заказ...' : 'Подтвердить заказ'}
           </button>
         </form>
 
         <OrderSummary
           subtotal={subtotal}
           deliveryCost={deliveryCost}
-          note="После подтверждения будет показан номер заказа и страница успешного оформления."
+          note="После подтверждения order-service создаст заказ, а catalog-service спишет зарезервированный товар со склада."
         />
       </section>
     </div>
